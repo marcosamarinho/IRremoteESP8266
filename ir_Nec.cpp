@@ -17,16 +17,13 @@
 #define NEC_ONE_SPACE   1690 //3T
 #define NEC_ZERO_SPACE   560 //1T
 #define NEC_RPT_SPACE  40000 
-//#define NEC_RPT_MARK    2000 
 
-// Calculate data based on  address and commnd .  
-unsigned long IRsend::hashNEC(unsigned int address ,unsigned  int command ) {
-   return ( address << 24) + ((address ^ 0xFF) << 16) + ( command <<  8) + (command ^ 0xFF); 
-}
 
 //+=============================================================================
 #if SEND_NEC
-void IRsend::sendNEC(unsigned long data, int nbits) {
+
+void IRsend::sendNEC(unsigned long data, int nbits) { 
+
   // Set IR carrier frequency
   enableIROut(38);
   // Header
@@ -44,6 +41,16 @@ void IRsend::sendNEC(unsigned long data, int nbits) {
   mark( NEC_HDR_MARK  );
   space(NEC_ZERO_SPACE);
 }
+
+// Calculate data based on  address and commnd .  
+unsigned long IRsend::encodeNEC(unsigned int address ,unsigned  int command ) {
+   return ( address << 24) + ((address ^ 0xFF) << 16) + ( command <<  8) + (command ^ 0xFF); 
+}
+
+void IRsend::send_addressNEC(unsigned int address ,unsigned  int command,int nbits) { 
+  return sendNEC(encodeNEC( address, command ), nbits) ; 
+} 
+
 #endif
 //+=============================================================================
 // NECs have a repeat only 4 items long
@@ -87,8 +94,8 @@ bool IRrecv::decodeNEC(decode_results *results) {
   results->address     = address ; 
   results->decode_type = NEC;
   
-  // Decode address,command to use latter 
-  //Serial.println(String(hashNEC(address,command),HEX)); 
+  //Decode address,command to use latter as send input 
+  //Serial.println(String(rawNEC(address,command),HEX)); 
  
   return true;
 }
